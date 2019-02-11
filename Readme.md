@@ -19,3 +19,8 @@ you can only run 1 command and set 1 enviroment variable. This is a limitation o
 `ca.farsos.backup.exec={the command that needs to be run. Example: pg_dumpall -w -U postgres}`
 
 `ca.farsos.backup.name={Name you want on the Backup}`
+
+#TODO
+- [ ] Add dry run command so that you can see what containers and volumes get backed up
+- [ ] Add prune command so that restic can prune old snapshots
+- [ ] Testing
