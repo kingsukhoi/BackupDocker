@@ -1,8 +1,7 @@
 #!/bin/bash
-set -ue
+set -uex
 
 whereami="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-export TEMP_DIR="/tmp/FarsosBackupScript"
 PID_FILE="/var/run/BullBlackBackup.pid"
 
 clean_up (){
@@ -47,13 +46,14 @@ create_temp_dir (){
 
 run_cmds(){
     cmd_info=$(docker ps --filter "label=$BACKUP_CONTAINER_LABEL" \
-        --format "{{.ID}},{{.Label \"$BACKUP_CONTAINER_LABEL\"}},{{.Label \"$BACKUP_ENV_LABEL\"}},{{.Name}}")
+        --format "{{.ID}},{{.Label \"$BACKUP_CONTAINER_LABEL\"}},{{.Label \"$BACKUP_ENV_LABEL\"}},{{.Label \"$BACKUP_CONTAINER_NAME\"}}")
     while read -r line; do
         container_id=$(echo "$line" | cut -d',' -f 1)
         container_cmd=$(echo "$line" | cut -d',' -f 2)
         container_env=$(echo "$line" | cut -d',' -f 3)
-        secret=$(sh -c "[ -z \"\$$container_env\" ] && echo \"Cannot find $container_env.\" || echo \"\$$container_env\"" )
-        bash -c "docker exec \"$container_id\" sh -c \" $container_env=$secret; export $container_env; $container_cmd\""
+        container_name=$(echo "$line" | cut -d',' -f 4)
+		secret=$(sh -c "[ -z \"\$$container_env\" ] && echo \"Cannot find $container_env.\" || echo \"\$$container_env\"" )
+        bash -c "docker exec \"$container_id\" sh -c \" $container_env=$secret; export $container_env; $container_cmd\"" > "$TEMP_DIR/$container_name.bak"
     done <<< "$cmd_info"
 }
 
