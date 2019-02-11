@@ -10,4 +10,10 @@ This will backup the volume mount.
 
 ## Backup Container by Command
 
-Set `ca.farsos.backup.cmd=${what ever command needs running in the container}`
+You need 3 variables to backup a container by command.
+
+you can only run 1 command and set 1 enviroment variable. This is a limitation of 
+
+`ca.farsos.backup.env={Name of the environment variable}`
+`ca.farsos.backup.exec={the command that needs to be run. Example: pg_dumpall -w -U postgres}`
+`ca.farsos.backup.name={Name you want on the Backup}`
