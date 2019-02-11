@@ -1,0 +1,77 @@
+version: '3.7'
+
+services:
+    PostgresDB:
+        image: postgres
+        env_file: "./postgres.env"
+        volumes:
+            - postgres_data:/var/lib/postgresql/data
+        secrets:
+            - db_password
+        labels:
+            - "ca.farsos.backup.env=PGPASSWORD"
+            - "ca.farsos.backup.exec=pg_dumpall -w -U postgres"
+    MariaDB:
+        image: mariadb
+        env_file: "./maria.env"
+        volumes:
+            - maria_data:/var/lib/mysql
+        secrets:
+            - db_password
+        labels:
+            - "ca.farsos.backup.env=MYSQL_PWD"
+            - "ca.farsos.backup.exec=mysqldump -u root --all-databases"
+#    MayanEDMS:
+#        image: mayanedms/mayanedms
+#        depends_on:
+#            - PostgresDB
+#        restart: always
+#        volumes:
+#            - mayan_data:/var/lib/mayan
+#        env_file: "./mayan.env"
+    Seafile:
+        image: kingsukhoi/seafile
+        depends_on: 
+            - MariaDB
+        env_file: "./seafile.env"
+        volumes:
+            - seafile_data:/shared
+        ports:
+            - 80:80
+            - 443:443
+#    LetsEncrypt:
+#        image: kingsukhoi/certbot
+#        env_file: './letsencrypt.env'
+#        volumes: 
+#            - letsencrypt_data:/etc/hacerts
+#        secrets:
+#            - cloudflare
+#    HaProxy:
+#        image: haproxy
+#        depends_on:
+#            - Seafile
+#            - MayanEDMS
+#            - LetsEncrypt
+#        volumes:
+#            - ./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+#            - letsencrypt_data:/etc/hacerts:ro
+#        ports:
+#            - 80:80
+#            - 443:443
+
+volumes:
+    postgres_data:
+    maria_data:
+    mayan_data:
+        labels:
+            - 'ca.farsos.backup.volume=true'
+    seafile_data:
+        labels:
+            - 'ca.farsos.backup.volume=true'
+    letsencrypt_data:
+
+secrets:
+   db_password:
+     file: ./db_password.txt
+   cloudflare:
+     file: ./cloudflare
