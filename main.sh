@@ -68,6 +68,7 @@ startup(){
 }
 
 main(){
+	make_pid_file
     startup
     run_cmds
 	run_backup
