@@ -11,6 +11,7 @@ services:
         labels:
             - "ca.farsos.backup.env=PGPASSWORD"
             - "ca.farsos.backup.exec=pg_dumpall -w -U postgres"
+            - "ca.farsos.backup.name=PostgresDB"
     MariaDB:
         image: mariadb
         env_file: "./maria.env"
@@ -21,6 +22,7 @@ services:
         labels:
             - "ca.farsos.backup.env=MYSQL_PWD"
             - "ca.farsos.backup.exec=mysqldump -u root --all-databases"
+            - "ca.farsos.backup.name=MariaDB"
 #    MayanEDMS:
 #        image: mayanedms/mayanedms
 #        depends_on:

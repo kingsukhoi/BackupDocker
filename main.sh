@@ -35,6 +35,7 @@ import_env_file(){
 BACKUP_VOLUME_LABEL='ca.farsos.backup.volume=true'
 BACKUP_CONTAINER_LABEL='ca.farsos.backup.exec'
 BACKUP_ENV_LABEL='ca.farsos.backup.env'
+BACKUP_CONTAINER_NAME='ca.farsos.backup.name'
 
 volume_cmd="docker volume ls --filter \"label=$BACKUP_VOLUME_LABEL\" --format '{{.Mountpoint}}' | sed ':a;N;\$!ba;s/\n/ /g'"
 
@@ -46,13 +47,13 @@ create_temp_dir (){
 
 run_cmds(){
     cmd_info=$(docker ps --filter "label=$BACKUP_CONTAINER_LABEL" \
-        --format "{{.ID}},{{.Label \"$BACKUP_CONTAINER_LABEL\"}},{{.Label \"$BACKUP_ENV_LABEL\"}}")
+        --format "{{.ID}},{{.Label \"$BACKUP_CONTAINER_LABEL\"}},{{.Label \"$BACKUP_ENV_LABEL\"}},{{.Name}}")
     while read -r line; do
         container_id=$(echo "$line" | cut -d',' -f 1)
         container_cmd=$(echo "$line" | cut -d',' -f 2)
         container_env=$(echo "$line" | cut -d',' -f 3)
-        secret=$(sh -c "[ -z \"\${$container_env}\" ] && echo \"Cannot find $container_env.\" || echo \"\${$container_env}\"" )
-        echo "docker exec \"$container_id\" sh -c \" $container_env=$secret; export $container_env; ${container_cmd}\"" | bash
+        secret=$(sh -c "[ -z \"\$$container_env\" ] && echo \"Cannot find $container_env.\" || echo \"\$$container_env\"" )
+        bash -c "docker exec \"$container_id\" sh -c \" $container_env=$secret; export $container_env; $container_cmd\""
     done <<< "$cmd_info"
 }
 
