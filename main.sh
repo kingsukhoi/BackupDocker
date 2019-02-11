@@ -1,5 +1,5 @@
 #!/bin/bash
-set -uex
+set -ue
 
 whereami="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 PID_FILE="/var/run/BullBlackBackup.pid"
@@ -57,6 +57,11 @@ run_cmds(){
     done <<< "$cmd_info"
 }
 
+run_backup(){
+    volumes=$(bash -c "$volume_cmd")
+	restic backup $volumes $TEMP_DIR
+}
+
 startup(){
     create_temp_dir
     import_env_file
@@ -64,8 +69,9 @@ startup(){
 
 main(){
     startup
-    bash -c "$volume_cmd"
     run_cmds
+	run_backup
+	clean_up
 }
 
 main "$@"
